@@ -1,27 +1,35 @@
 ﻿using OpenCvSharp;
+using WeekPlanRecognizer.Services;
 
 namespace WeekPlanRecognizer;
 
 class Program
 {
-    private const string inputPath = "wochenplan.jpg";
-    private const string outputPath = "wochenplan_rotated.png";
-    
+    private const string InputPath = "wochenplan.jpg";
+
     static void Main(string[] args)
     {
-        using Mat original = Cv2.ImRead(inputPath);
+        using var original = Cv2.ImRead(InputPath);
+
         if (original.Empty())
         {
-            Console.WriteLine("No image found");
+            Console.WriteLine("Bild nicht gefunden.");
             return;
         }
 
-        using Mat rotated = new();
-        
-        Cv2.Rotate(original, rotated, RotateFlags.Rotate90Clockwise);
-        
-        Cv2.ImWrite(outputPath, rotated);
+        using var rotated = new Mat();
 
-        Console.WriteLine($"Image saved: {outputPath}");
+        Cv2.Rotate(
+            original,
+            rotated,
+            RotateFlags.Rotate90Counterclockwise
+        );
+
+        var detector = new GridLineDetector();
+
+        using var result = detector.DetectLines(rotated);
+
+        Console.WriteLine("Linienerkennung abgeschlossen.");
+
     }
 }
